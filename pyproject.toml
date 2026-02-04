@@ -6,8 +6,9 @@ readme = "README.md"
 authors = [{ name = "IBM Corp." }]
 requires-python = ">=3.11,<4.0"
 dependencies = [
-    "agentstack-sdk==0.4.1",
+    "agentstack-sdk[docling]==0.4.3",
     "pyyaml>=6.0.2",
+    "beeai-framework[agentstack]>=0.1.76",
 ]
 
 [tool.ruff]
