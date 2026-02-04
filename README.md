@@ -67,6 +67,8 @@ docling:
   enabled: true
 ```
 
+> ⚠️ Phoenix uses Elastic License v2 - review before production use
+
 ---
 
 ## 3. Start the Platform With Custom Config
@@ -78,25 +80,16 @@ agentstack platform stop
 agentstack platform start --config agentstack-config.yaml
 ```
 
-Confirm the platform is running:
-
-```bash
-agentstack ui
-```
-
 ---
 
 ## 4. Run the Agent
 
-Install dependencies locally:
+Clone and run the agent:
 
 ```bash
-uv pip install "beeai-framework[agentstack]"
-```
-
-Run the agent:
-
-```bash
+git clone https://github.com/jenna-winkler/rag.git
+cd rag
+uv sync
 uv run server
 ```
 
@@ -118,4 +111,4 @@ When the agent starts, it will:
   ```
 
 * **Arize Phoenix**
-  Available via the Agent Stack UI when enabled
+  Available via TBD
