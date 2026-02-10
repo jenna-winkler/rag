@@ -2,19 +2,27 @@
 
 This example demonstrates an agentic RAG architecture built with:
 
-* **BeeAI Framework** – agent orchestration and reasoning
-* **Docling** – document processing
-* **Milvus** – vector store for semantic retrieval
-* **Arize Phoenix** – observability and tracing
+* **BeeAI Framework** – agent orchestration and reasoning  
+* **Docling** – document processing  
+* **Milvus** – vector store for semantic retrieval  
+* **Arize Phoenix** – observability and tracing  
 * **Agent Stack** – local platform runtime and deployment
-
-The agent assumes that documents are **preprocessed and ingested before runtime**. At inference time, the agent only performs retrieval and reasoning.
 
 ---
 
-## Prerequisites
+## Workflow
 
-* An LLM provider (OpenAI, Anthropic, watsonx, etc.) **or** Ollama
+1. Request to Agent Stack – The system receives a new user message.
+
+2. Extract Data with Docling – Relevant information is parsed and extracted from the document.
+
+3. Store in Milvus – The extracted embeddings are stored in the Milvus vector database.
+
+4. Run BeeAI Agent – The BeeAI agent performs reasoning and retrieves relevant context.
+
+5. Store Conversation – The conversation and results are logged for observability.
+
+6. Respond to User – The final response is generated and returned to the user.
 
 ---
 
@@ -27,88 +35,80 @@ sh -c "$(curl -LsSf https://raw.githubusercontent.com/i-am-bee/agentstack/instal
 ```
 
 This will:
-- Install the `agentstack` CLI
-- Download and start the Agent Stack platform
-- Prompt you to configure an LLM provider
-- Launch the Agent Stack UI
+- Install the `agentstack` CLI  
+- Download and start the Agent Stack platform  
+- Prompt you to configure an LLM provider  
+- Launch the Agent Stack UI  
 
-For other installation options, see the [quickstart](https://agentstack.beeai.dev/stable/introduction/quickstart).
-
----
-
-## 2. Platform Configuration
-
-Agent Stack supports platform configuration via a YAML config file.
-
-Create a file called `agentstack-config.yaml` and start from the default values, then apply the changes below.
-
-```yaml
-# Disable built-in PostgreSQL
-postgresql:
-  enabled: false
-
-# Point to external Milvus
-externalDatabase:
-  host: "milvus.example.com"
-  port: 19530
-  user: "milvus-user"
-  password: "milvus-password"
-  database: "agentstack"
-  adminUser: "admin"
-  adminPassword: "admin-password"
-  ssl: false
-
-# Enable Phoenix observability
-phoenix:
-  enabled: true
-
-# Enable Docling document processing
-docling:
-  enabled: true
-```
-
-> ⚠️ Phoenix uses Elastic License v2 - review before production use
+For other installation options, see the [Quickstart guide](https://agentstack.beeai.dev/stable/introduction/quickstart).
 
 ---
 
-## 3. Start the Platform With Custom Config
+## 2. Start the Agent Stack
 
-Restart Agent Stack using your custom config file:
+Restart Agent Stack using your custom configuration file:
 
 ```bash
 agentstack platform stop
-agentstack platform start --config agentstack-config.yaml
+agentstack platform start --set phoenix.enabled=true --set docling.enabled=true
+```
+
+Then, set up the LLM provider via:
+
+```bash
+agentstack model setup
 ```
 
 ---
 
-## 4. Run the Agent
+## 3. Create a Managed MilvusDB Instance
 
-Clone and run the agent:
+1. Visit [https://milvus.io/](https://milvus.io/)  
+2. Click **Try Managed Milvus**  
+3. Create a new project  
+4. Create a new cluster  
+5. Save the **Public Endpoint** (`MILVUS_DB_URI`) and **Token** (`MILVUS_DB_TOKEN`)  
+6. Run the following command to set the environment variables for the agent:
+
+```bash
+agentstack env add 'RAG Milvus' \
+  MILVUS_DB_URI="..." \
+  MILVUS_DB_TOKEN="..."
+```
+
+---
+
+## 4. Install the Project
+
+Clone the repository and install the project:
 
 ```bash
 git clone https://github.com/jenna-winkler/rag.git
 cd rag
 uv sync
-uv run server
 ```
-
-When the agent starts, it will:
-
-* Register itself with Agent Stack
-* Expose an agent card
-* Use the **Milvus vector store**
-* Emit traces to **Arize Phoenix**
 
 ---
 
-## 5. Access the UI and Observability
+## 5. Run the Agent
 
-* **Agent Stack UI**
+To run the agent, first start the server:
 
-  ```bash
-  agentstack ui
-  ```
+```bash
+uv run server
+```
 
-* **Arize Phoenix**
-  Available via TBD
+Then, interact with the `RAG Milvus` agent using the UI:
+
+```bash
+agentstack ui
+```
+
+Open your browser and navigate to [http://localhost:8334/](http://localhost:8334/).
+
+---
+
+## 6. Observability
+
+Traces are stored in the Arize Phoenix instance managed by Agent Stack itself.  
+Open [http://localhost:6006](http://localhost:6006) in your browser and navigate to the default project to explore the collected traces.

@@ -6,9 +6,13 @@ readme = "README.md"
 authors = [{ name = "IBM Corp." }]
 requires-python = ">=3.11,<4.0"
 dependencies = [
-    "agentstack-sdk[docling]==0.4.3",
+    "agentstack-sdk==0.6.1",
     "pyyaml>=6.0.2",
-    "beeai-framework[agentstack]>=0.1.76",
+    "beeai-framework[rag]>=0.1.76",
+    "langchain-milvus>=0.1.10",
+    "openinference-instrumentation-beeai>=0.1.15",
+    "ruff>=0.15.0",
+    "black>=26.1.0",
 ]
 
 [tool.ruff]
@@ -16,7 +20,7 @@ line-length = 120
 target-version = "py311"
 
 [project.scripts]
-server = "agentstack_agents.agent:run"
+server = "agentstack_agents.agent:serve"
 
 [build-system]
 requires = ["hatchling"]
