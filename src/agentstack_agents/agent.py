@@ -206,7 +206,6 @@ async def rag_agent(
             "uri": os.environ["MILVUS_DB_URI"],
             "token": os.environ["MILVUS_DB_TOKEN"],
         },
-        auto_id=True,
         # index_params={"index_type": "FLAT", "metric_type": "L2"},
     )
     assert isinstance(vector_store, LangChainVectorStore)
@@ -261,6 +260,7 @@ async def rag_agent(
             chunks = await text_splitter.split_text(loaded_file.text)
             documents = [
                 Document(
+                    id=f"{file.id}_chunk_{idx}",
                     content=chunk,
                     metadata={"source": file.filename, "source_id": file.id},
                 )
