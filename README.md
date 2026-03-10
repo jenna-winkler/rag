@@ -1,86 +1,80 @@
 # Agentic RAG Example
 
-This example demonstrates an agentic RAG architecture built with:
+An agentic RAG (Retrieval-Augmented Generation) system that lets you upload documents, ask questions about them, and get answers grounded in the document content.
 
-* **BeeAI Framework** – agent orchestration and reasoning  
-* **Docling** – document processing  
-* **Milvus** – vector store for semantic retrieval  
-* **Arize Phoenix** – observability and tracing  
-* **Agent Stack** – local platform runtime and deployment
+Upload a PDF, Word doc, spreadsheet, image, or other supported file — the agent parses it, stores the embeddings in a vector database, and uses them to answer your questions in a multi-turn conversation.
 
----
+### Built with
 
-## Workflow
+* **[BeeAI Framework](https://github.com/i-am-bee/beeai-framework)** – agent orchestration and reasoning
+* **[Docling](https://github.com/docling-project/docling)** – document parsing and text extraction
+* **[Milvus](https://milvus.io/)** – vector database for semantic search
+* **[Arize Phoenix](https://phoenix.arize.com/)** – observability and tracing
+* **[Agent Stack](https://agentstack.beeai.dev/)** – local platform runtime
 
-1. Request to Agent Stack – The system receives a new user message.
+### Supported file types
 
-2. Extract Data with Docling – Relevant information is parsed and extracted from the document.
-
-3. Store in Milvus – The extracted embeddings are stored in the Milvus vector database.
-
-4. Run BeeAI Agent – The BeeAI agent performs reasoning and retrieves relevant context.
-
-5. Store Conversation – The conversation and results are logged for observability.
-
-6. Respond to User – The final response is generated and returned to the user.
+PDF, DOCX, XLSX, PPTX, Markdown, AsciiDoc, HTML, CSV, PNG, JPEG, TIFF, BMP, WEBP
 
 ---
 
-## 1. Installation
+## How it works
 
-Install Agent Stack using the official one-line installer:
+1. **User uploads a document** — The file is sent to the agent through the Agent Stack UI.
+2. **Docling extracts text** — The document is parsed asynchronously via the Docling service and split into chunks.
+3. **Embeddings stored in Milvus** — Each chunk is embedded (using OpenAI `text-embedding-3-small` by default) and stored in a Milvus collection.
+4. **User asks a question** — The BeeAI agent searches the vector store for relevant chunks and reasons over them to produce an answer.
+5. **Conversation continues** — The agent maintains conversation history, so you can ask follow-up questions against the same documents.
+
+---
+
+## Prerequisites
+
+- Python >= 3.11
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+- A [Milvus](https://milvus.io/) cloud instance (free tier available)
+
+---
+
+## Setup
+
+### 1. Install Agent Stack
 
 ```bash
 sh -c "$(curl -LsSf https://raw.githubusercontent.com/i-am-bee/agentstack/install/install.sh)"
 ```
 
-This will:
-- Install the `agentstack` CLI  
-- Download and start the Agent Stack platform  
-- Prompt you to configure an LLM provider  
-- Launch the Agent Stack UI  
+This installs the `agentstack` CLI, downloads the platform, and launches the UI. For other options, see the [Quickstart guide](https://agentstack.beeai.dev/stable/introduction/quickstart).
 
-For other installation options, see the [Quickstart guide](https://agentstack.beeai.dev/stable/introduction/quickstart).
-
----
-
-## 2. Start the Agent Stack
-
-Restart Agent Stack using your custom configuration file:
+### 2. Start the platform with Docling and Phoenix enabled
 
 ```bash
 agentstack platform stop
 agentstack platform start --set phoenix.enabled=true --set docling.enabled=true
 ```
 
-Then, set up the LLM provider via:
+### 3. Configure an LLM provider
 
 ```bash
 agentstack model setup
 ```
 
----
+Follow the prompts to connect an LLM provider (e.g., OpenAI). This is used for both chat completions and embeddings.
 
-## 3. Create a Managed MilvusDB Instance
+### 4. Create a Milvus cloud instance
 
-1. Visit [https://milvus.io/](https://milvus.io/)  
-2. Click **Try Managed Milvus**  
-3. Create a new project  
-4. Create a new cluster  
-5. Save the **Public Endpoint** (`MILVUS_DB_URI`) and **Token** (`MILVUS_DB_TOKEN`)  
-6. Run the following command to set the environment variables for the agent:
+1. Go to [milvus.io](https://milvus.io/) and click **Try Managed Milvus**
+2. Create a project and cluster
+3. Copy the **Public Endpoint** and **Token**
+4. Register them with Agent Stack:
 
 ```bash
 agentstack env add 'RAG Milvus' \
-  MILVUS_DB_URI="..." \
-  MILVUS_DB_TOKEN="..."
+  MILVUS_DB_URI="your-endpoint" \
+  MILVUS_DB_TOKEN="your-token"
 ```
 
----
-
-## 4. Install the Project
-
-Clone the repository and install the project:
+### 5. Clone and install
 
 ```bash
 git clone https://github.com/jenna-winkler/rag.git
@@ -90,25 +84,24 @@ uv sync
 
 ---
 
-## 5. Run the Agent
+## Running the agent
 
-To run the agent, first start the server:
+Start the agent server:
 
 ```bash
 uv run server
 ```
 
-Then, interact with the `RAG Milvus` agent using the UI:
+Then open the Agent Stack UI:
 
 ```bash
 agentstack ui
 ```
 
-Open your browser and navigate to [http://localhost:8334/](http://localhost:8334/).
+Go to [http://localhost:8334](http://localhost:8334), select the **RAG Milvus** agent, upload a document, and start asking questions.
 
 ---
 
-## 6. Observability
+## Observability
 
-Traces are stored in the Arize Phoenix instance managed by Agent Stack itself.  
-Open [http://localhost:6006](http://localhost:6006) in your browser and navigate to the default project to explore the collected traces.
+Traces are collected automatically via Arize Phoenix. Open [http://localhost:6006](http://localhost:6006) to explore agent runs, tool calls, and latency data.
